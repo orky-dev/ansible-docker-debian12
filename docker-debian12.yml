@@ -1,0 +1,67 @@
+---
+- hosts: all
+  tasks:
+  - name: Update the apt package index
+    become: yes
+    apt:
+      name: "*"
+      state: latest
+      update_cache: yes
+      force_apt_get: yes
+
+  - name: Install packages for apt add repository over HTTPS
+    become: yes
+    apt:
+      name: "{{ dependencies }}"
+      force_apt_get: yes
+      state: latest
+      update_cache: yes
+    vars:
+      dependencies:
+      - git
+      - apt-transport-https
+      - ca-certificates
+      - wget
+      - software-properties-common
+      - gnupg2
+      - curl
+
+  - name: Check if docker key exists
+    stat:
+       path: /etc/apt/keyrings/docker.gpg
+    register: docker_gpg
+
+  - name: Create APT keyring directory
+    file:
+      path: /etc/apt/keyrings
+      state: directory
+      mode: '0755'
+      owner: root
+      group: root
+
+  - name: Download docker armored signature
+    get_url:
+      url: https://download.docker.com/linux/debian/gpg
+      dest: /tmp/docker.asc
+    when: not docker_gpg.stat.exists
+
+  - name: Dearmor docker asc
+    command: /usr/bin/gpg --dearmor -o /etc/apt/keyrings/docker.gpg /tmp/docker.asc
+    when: not docker_gpg.stat.exists
+
+  - name: Add docker apt repository
+    apt_repository:
+      repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+      state: present
+      update_cache: yes
+      filename: docker
+
+# sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - name: Install docker
+    ansible.builtin.apt:
+      pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin

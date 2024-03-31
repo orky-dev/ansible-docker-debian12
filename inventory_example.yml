@@ -1,0 +1,6 @@
+---
+all:
+  hosts:
+    my_docker_host:
+      ansible_host: x.x.x.x
+      ansible_user: root
