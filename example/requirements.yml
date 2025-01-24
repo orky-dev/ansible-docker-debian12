@@ -1,0 +1,6 @@
+---
+roles:
+  - name: docker_debian
+    src: ssh://git@github.com/orky-dev/ansible-role-docker-debian.git
+    version: main
+    scm: git

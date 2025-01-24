@@ -1,0 +1,6 @@
+---
+docker_debian_dependencies:
+  - apt-transport-https
+  - ca-certificates
+  - software-properties-common
+  - gnupg2

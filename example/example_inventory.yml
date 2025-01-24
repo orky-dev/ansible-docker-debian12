@@ -1,0 +1,5 @@
+docker:
+  hosts:
+    test:
+      ansible_host: hostname_or_ip
+      ansible_user: user_with_a_root
